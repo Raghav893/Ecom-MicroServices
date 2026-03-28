@@ -18,6 +18,6 @@ public class RegisterDTO {
     private String password;
 
     @NotNull
-    private Role role
+    private Role role;
 
 }
