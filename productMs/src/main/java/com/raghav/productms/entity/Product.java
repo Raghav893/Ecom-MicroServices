@@ -23,6 +23,9 @@ public class Product {
     private String description;
 
     @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
     private double price;
 
     @Column(nullable = false)

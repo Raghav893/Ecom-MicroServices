@@ -1,25 +1,28 @@
 package com.raghav.productms.dto;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
 public class AddProductDTO {
-    @NotNull
+    @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     private String description;
 
-    @NotNull
-    private String imagUrl;
+    @NotBlank
+    private String category;
 
-    @NotNull
+    @NotBlank
+    @JsonAlias("imagUrl")
+    private String imageUrl;
+
     @PositiveOrZero
     private double price;
 
-    @NotNull
     @PositiveOrZero
     private int stock;
 }
