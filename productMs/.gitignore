@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 
 ### STS ###
+AGENTS.md
 .apt_generated
 .classpath
 .factorypath
