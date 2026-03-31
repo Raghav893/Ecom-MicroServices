@@ -1,0 +1,16 @@
+server:
+  port: 8083
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  jmx:
+    enabled: false
+  cache:
+    type: redis
+    redis:
+      cache-null-value: false
+app:
+  cache:
+    feed-ttl: 60s
