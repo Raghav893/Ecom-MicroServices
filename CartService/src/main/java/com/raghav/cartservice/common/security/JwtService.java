@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -25,6 +26,22 @@ public class JwtService {
     }
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
+    }
+
+    public UUID extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        String userIdClaim = claims.get("userId", String.class);
+
+        if (userIdClaim != null && !userIdClaim.isBlank()) {
+            return parseUuid(userIdClaim);
+        }
+
+        String subject = claims.getSubject();
+        if (subject != null && !subject.isBlank()) {
+            return parseUuid(subject);
+        }
+
+        return null;
     }
 
 
@@ -81,5 +98,12 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    private UUID parseUuid(String value) {
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
 
 }

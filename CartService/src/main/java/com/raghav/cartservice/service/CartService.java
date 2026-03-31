@@ -1,9 +1,12 @@
 package com.raghav.cartservice.service;
 
+import com.raghav.cartservice.common.security.AuthenticatedUser;
 import com.raghav.cartservice.model.Cart;
 import com.raghav.cartservice.model.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -19,7 +22,8 @@ public class CartService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ProductGateway productGateway;
 
-    public void addToCart(UUID userId, String productId, int quantity) {
+    public void addToCart(String productId, int quantity) {
+        UUID userId = getCurrentUserId();
         validateUserId(userId);
         validateProductId(productId);
 
@@ -36,12 +40,13 @@ public class CartService {
         redisTemplate.opsForHash().put(cartKey, productId, updatedQuantity);
     }
 
-    public void updateQuantity(UUID userId, String productId, int quantity) {
+    public void updateQuantity(String productId, int quantity) {
+        UUID userId = getCurrentUserId();
         validateUserId(userId);
         validateProductId(productId);
 
         if (quantity <= 0) {
-            removeItem(userId, productId);
+            removeItem(productId);
             return;
         }
 
@@ -50,14 +55,16 @@ public class CartService {
         redisTemplate.opsForHash().put(buildCartKey(userId), productId, quantity);
     }
 
-    public void removeItem(UUID userId, String productId) {
+    public void removeItem(String productId) {
+        UUID userId = getCurrentUserId();
         validateUserId(userId);
         validateProductId(productId);
 
         redisTemplate.opsForHash().delete(buildCartKey(userId), productId);
     }
 
-    public Cart getCart(UUID userId) {
+    public Cart getCart() {
+        UUID userId = getCurrentUserId();
         validateUserId(userId);
 
         Map<Object, Object> cartEntries = redisTemplate.opsForHash().entries(buildCartKey(userId));
@@ -72,7 +79,8 @@ public class CartService {
         return new Cart(userId, items);
     }
 
-    public void clearCart(UUID userId) {
+    public void clearCart() {
+        UUID userId = getCurrentUserId();
         validateUserId(userId);
         redisTemplate.delete(buildCartKey(userId));
     }
@@ -112,5 +120,16 @@ public class CartService {
         if (!StringUtils.hasText(productId)) {
             throw new IllegalArgumentException("productId is required");
         }
+    }
+
+    private UUID getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
+            throw new IllegalStateException("Authenticated user not found");
+        }
+        if (user.userId() == null) {
+            throw new IllegalStateException("Authenticated user id not found in token");
+        }
+        return user.userId();
     }
 }

@@ -7,13 +7,7 @@ spring:
       port: 6379
   jmx:
     enabled: false
-  cache:
-    type: redis
-    redis:
-      cache-null-value: false
-app:
-  cache:
-    feed-ttl: 60s
+
 services:
   product-service:
     url: http://localhost:8082

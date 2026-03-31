@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/cart")
@@ -29,7 +27,7 @@ public class CartController {
 
     @PostMapping("/add")
     public ApiResponse<Void> addToCart(@Valid @RequestBody AddToCartRequest request) {
-        cartService.addToCart(request.getUserId(), request.getProductId(), request.getQuantity());
+        cartService.addToCart(request.getProductId(), request.getQuantity());
 
         return ApiResponse.<Void>builder()
                 .success(true)
@@ -41,7 +39,7 @@ public class CartController {
 
     @PutMapping("/update")
     public ApiResponse<Void> updateQuantity(@Valid @RequestBody UpdateCartRequest request) {
-        cartService.updateQuantity(request.getUserId(), request.getProductId(), request.getQuantity());
+        cartService.updateQuantity(request.getProductId(), request.getQuantity());
 
         return ApiResponse.<Void>builder()
                 .success(true)
@@ -52,11 +50,8 @@ public class CartController {
     }
 
     @DeleteMapping("/remove/{productId}")
-    public ApiResponse<Void> removeItem(
-            @RequestParam UUID userId,
-            @PathVariable String productId
-    ) {
-        cartService.removeItem(userId, productId);
+    public ApiResponse<Void> removeItem(@PathVariable String productId) {
+        cartService.removeItem(productId);
 
         return ApiResponse.<Void>builder()
                 .success(true)
@@ -67,8 +62,8 @@ public class CartController {
     }
 
     @GetMapping
-    public ApiResponse<Cart> getCart(@RequestParam UUID userId) {
-        Cart cart = cartService.getCart(userId);
+    public ApiResponse<Cart> getCart() {
+        Cart cart = cartService.getCart();
 
         return ApiResponse.<Cart>builder()
                 .success(true)
@@ -79,8 +74,8 @@ public class CartController {
     }
 
     @DeleteMapping("/clear")
-    public ApiResponse<Void> clearCart(@RequestParam UUID userId) {
-        cartService.clearCart(userId);
+    public ApiResponse<Void> clearCart() {
+        cartService.clearCart();
 
         return ApiResponse.<Void>builder()
                 .success(true)
