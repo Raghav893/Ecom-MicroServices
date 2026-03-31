@@ -14,3 +14,6 @@ spring:
 app:
   cache:
     feed-ttl: 60s
+services:
+  product-service:
+    url: http://localhost:8082
