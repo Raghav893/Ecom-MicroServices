@@ -1,6 +1,7 @@
 package com.raghav.cartservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,8 +19,9 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID cartId;
 
-    @Column(nullable = false)
-    private UUID userId;
+    @Column(nullable = false,unique = true)
+    @Email
+    private String userId;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
