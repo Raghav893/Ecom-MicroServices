@@ -2,6 +2,7 @@ package com.raghav.cartservice.service;
 
 import com.raghav.cartservice.common.response.ApiResponse;
 import com.raghav.cartservice.config.ProductFeignConfig;
+import com.raghav.cartservice.dto.AddToCartDTO;
 import com.raghav.cartservice.entity.Cart;
 import com.raghav.cartservice.entity.CartItem;
 import com.raghav.cartservice.repo.CartItemRepository;
@@ -36,7 +37,9 @@ public class CartService {
 
     @Transactional
     @CacheEvict(cacheNames = "cart",allEntries = true)
-    public Cart addToCart(UUID productId, int quantity) {
+    public Cart addToCart(AddToCartDTO dto) {
+        UUID productId = dto.getProductId();
+        int quantity = dto.getQuantity();
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
         }
@@ -81,7 +84,9 @@ public class CartService {
     @Transactional
     @CacheEvict(cacheNames = "cart",allEntries = true)
 
-    public Cart updateQuantity(UUID productId, int quantity) {
+    public Cart updateQuantity(AddToCartDTO dto) {
+        UUID productId = dto.getProductId();
+        int quantity = dto.getQuantity();
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
         }
