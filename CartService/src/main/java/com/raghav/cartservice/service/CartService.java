@@ -6,6 +6,8 @@ import com.raghav.cartservice.entity.Cart;
 import com.raghav.cartservice.entity.CartItem;
 import com.raghav.cartservice.repo.CartItemRepository;
 import com.raghav.cartservice.repo.CartRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ public class CartService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "cart",allEntries = true)
     public Cart addToCart(UUID productId, int quantity) {
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
@@ -64,6 +67,10 @@ public class CartService {
         cart.setUpdatedAt(LocalDateTime.now());
         return cartRepository.save(cart);
     }
+    @Cacheable(
+            cacheNames = "cart",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).context.authentication.name + ':' + #page"
+    )
     public Cart getMyCart(){
         String userEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
         Cart cart = cartRepository.getCartsByUserId(userEmail)
@@ -72,6 +79,8 @@ public class CartService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "cart",allEntries = true)
+
     public Cart updateQuantity(UUID productId, int quantity) {
         if (quantity <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
@@ -89,6 +98,7 @@ public class CartService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "cart",allEntries = true)
     public Cart removeItem(UUID productId) {
         Cart cart = getCurrentUserCart();
         CartItem cartItem = cartItemRepository.findByCartAndProductId(cart, productId)
