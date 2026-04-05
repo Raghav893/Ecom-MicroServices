@@ -1,8 +1,6 @@
 package com.raghav.cartservice.config;
 
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-
-import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
@@ -22,21 +18,18 @@ public class RedisConfig {
     @Bean
     public CacheManager cacheManager(
             RedisConnectionFactory redisConnectionFactory,
-            @Value("60s")Duration feedTtl
+            @Value("${app.cache.cart-ttl:60s}") Duration cartTtl
             ){
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new GenericJacksonJsonRedisSerializer(objectMapper)));
+                        .fromSerializer(new JdkSerializationRedisSerializer()));
 
-        RedisCacheConfiguration feedConfig = defaultConfig.entryTtl(feedTtl);
+        RedisCacheConfiguration cartConfig = defaultConfig.entryTtl(cartTtl);
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)
-                .withCacheConfiguration("feed", feedConfig)
+                .withCacheConfiguration("cart", cartConfig)
                 .build();
     }
 

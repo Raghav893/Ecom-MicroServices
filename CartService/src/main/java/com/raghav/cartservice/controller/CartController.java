@@ -23,6 +23,7 @@ public class CartController {
 
         Cart cart = cartService.addToCart(dto);
         return ResponseEntity.ok(ApiResponse.<Cart>builder()
+                        .success(true)
                         .message("Product added to  cart")
                 .data(cart)
                         .errors(null)
@@ -34,6 +35,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<Cart>> getcart() {
         Cart cart = cartService.getMyCart();
         return ResponseEntity.ok(ApiResponse.<Cart>builder()
+                        .success(true)
                 .message("Your cart is ")
                 .data(cart)
                 .errors(null)
@@ -44,6 +46,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<Cart>> UpdateCartQuantity(@RequestBody AddToCartDTO dto) {
         Cart cart = cartService.updateQuantity(dto);
         return ResponseEntity.ok(ApiResponse.<Cart>builder()
+                        .success(true)
                 .message(" cart updated")
                 .data(cart)
                 .errors(null)
@@ -54,6 +57,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<Cart>> removeProduct(UUID id) {
         Cart cart = cartService.removeItem(id);
         return ResponseEntity.ok(ApiResponse.<Cart>builder()
+                        .success(true)
                 .message(" cart updated")
                 .data(cart)
                 .errors(null)

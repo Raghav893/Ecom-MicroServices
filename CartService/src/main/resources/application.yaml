@@ -3,7 +3,6 @@ server:
 spring:
   jmx:
     enabled: false
-
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ecomcart?allowPublicKeyRetrieval=true&useSSL=false}
     username: ${SPRING_DATASOURCE_USERNAME:root}
@@ -17,12 +16,13 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-  logging:
-    level:
-      org:
-        springframework:
-          security: DEBUG
+
   data:
     redis:
       host: localhost
       port: 6379
+
+app:
+  cache:
+    cart-ttl: 60s
+

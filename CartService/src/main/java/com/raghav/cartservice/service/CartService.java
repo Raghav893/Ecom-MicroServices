@@ -70,13 +70,14 @@ public class CartService {
         cart.setUpdatedAt(LocalDateTime.now());
         return cartRepository.save(cart);
     }
+    @Transactional(readOnly = true)
     @Cacheable(
             cacheNames = "cart",
-            key = "T(org.springframework.security.core.context.SecurityContextHolder).context.authentication.name + ':' + #page"
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).context.authentication.name"
     )
     public Cart getMyCart(){
         String userEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        Cart cart = cartRepository.getCartsByUserId(userEmail)
+        Cart cart = cartRepository.findWithItemsByUserId(userEmail)
                 .orElseGet(() -> createCart(userEmail));
         return cart;
     }
@@ -139,7 +140,7 @@ public class CartService {
 
     private Cart getCurrentUserCart() {
         String userEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
-        return cartRepository.getCartsByUserId(userEmail)
+        return cartRepository.findWithItemsByUserId(userEmail)
                 .orElseGet(() -> createCart(userEmail));
     }
 }
