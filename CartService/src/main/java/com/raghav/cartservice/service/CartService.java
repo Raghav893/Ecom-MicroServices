@@ -120,6 +120,19 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @Transactional
+    @CacheEvict(cacheNames = "cart",allEntries = true)
+    public Cart clearCart() {
+        Cart cart = getCurrentUserCart();
+        List<CartItem> items = cart.getItems();
+        if (items != null) {
+            items.clear();
+        }
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        return cartRepository.save(cart);
+    }
+
 
     private Cart createCart(String userEmail) {
         Cart cart = new Cart();

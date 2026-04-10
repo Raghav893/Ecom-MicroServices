@@ -53,12 +53,23 @@ public class CartController {
                 .build());
     }
 
-    @DeleteMapping("")
-    public ResponseEntity<ApiResponse<Cart>> removeProduct(UUID id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Cart>> removeProduct(@PathVariable UUID id) {
         Cart cart = cartService.removeItem(id);
         return ResponseEntity.ok(ApiResponse.<Cart>builder()
                         .success(true)
                 .message(" cart updated")
+                .data(cart)
+                .errors(null)
+                .build());
+    }
+
+    @DeleteMapping("")
+    public ResponseEntity<ApiResponse<Cart>> clearCart() {
+        Cart cart = cartService.clearCart();
+        return ResponseEntity.ok(ApiResponse.<Cart>builder()
+                .success(true)
+                .message(" cart cleared")
                 .data(cart)
                 .errors(null)
                 .build());
