@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static entity.Status.DELIVERED;
+import static entity.Status.SHIPPED;
+
 @Service
 public class OrderService {
 
@@ -107,6 +110,8 @@ public class OrderService {
             return myOrders;
         }
         public Order UpdateOrderStatus(OrderStatusDTO dto,UUID id ){
+
+        //Only for admins
             Order order = orderRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
 
@@ -114,6 +119,16 @@ public class OrderService {
             return orderRepository.save(order);
 
         }
+        public String cancelOrder(UUID id){
+            Order order = getOrderById(id);
+            if (order.getStatus().equals(SHIPPED) || order.getStatus().equals(DELIVERED)){
+                throw new RuntimeException("Order cannot be cancelled ");
+            }
+            orderRepository.delete(order);
+            return "order deleted";
+        }
+
+
     }
 
 
