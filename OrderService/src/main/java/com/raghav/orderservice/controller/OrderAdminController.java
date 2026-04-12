@@ -2,8 +2,9 @@ package com.raghav.orderservice.controller;
 
 import com.raghav.orderservice.common.response.ApiResponse;
 import com.raghav.orderservice.dto.OrderStatusDTO;
+import com.raghav.orderservice.entity.Order;
 import com.raghav.orderservice.service.OrderService;
-import entity.Order;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,7 @@ public class OrderAdminController {
             @RequestBody OrderStatusDTO dto,
             @PathVariable UUID id
     ) {
-        Order order = orderService.UpdateOrderStatus(dto, id);
+        Order order = orderService.updateOrderStatus(dto, id);
 
         ApiResponse<Order> response = ApiResponse.<Order>builder()
                 .success(true)

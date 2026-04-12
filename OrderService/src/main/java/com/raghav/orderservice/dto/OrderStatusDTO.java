@@ -1,10 +1,11 @@
 package com.raghav.orderservice.dto;
 
-import entity.Status;
+
+import com.raghav.orderservice.entity.Status;
 import lombok.Data;
 
 @Data
 public class OrderStatusDTO {
-    Status status;
+    private Status status;
 
 }

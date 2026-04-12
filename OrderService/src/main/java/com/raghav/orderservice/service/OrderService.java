@@ -7,10 +7,10 @@ import com.raghav.orderservice.dto.CartDTO;
 import com.raghav.orderservice.dto.CartItemDTO;
 import com.raghav.orderservice.dto.OrderStatusDTO;
 import com.raghav.orderservice.dto.ProductDTO;
+import com.raghav.orderservice.entity.Order;
+import com.raghav.orderservice.entity.OrderItem;
+import com.raghav.orderservice.entity.Status;
 import com.raghav.orderservice.repo.OrderRepository;
-import entity.Order;
-import entity.OrderItem;
-import entity.Status;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static entity.Status.DELIVERED;
-import static entity.Status.SHIPPED;
+import static com.raghav.orderservice.entity.Status.DELIVERED;
+import static com.raghav.orderservice.entity.Status.SHIPPED;
 
 @Service
 public class OrderService {
@@ -27,28 +27,30 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartFeignClient cartFeignClient;
     private final ProductFeignConfig productFeignConfig;
-    public OrderService(OrderRepository orderRepository, CartFeignClient cartFeignClient, ProductFeignConfig productFeignConfig) {
+
+    public OrderService(
+            OrderRepository orderRepository,
+            CartFeignClient cartFeignClient,
+            ProductFeignConfig productFeignConfig
+    ) {
         this.orderRepository = orderRepository;
         this.cartFeignClient = cartFeignClient;
         this.productFeignConfig = productFeignConfig;
     }
-    public Order placeOrder() {
 
-        // 1. Get userId
+    public Order placeOrder() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // 2. Fetch cart from Cart Service
         ApiResponse<CartDTO> cartResponse = cartFeignClient.getcart();
         CartDTO cart = cartResponse.getData();
 
-        if (cart == null || cart.getItems().isEmpty()) {
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        List<CartItemDTO> itemDTOS = cart.getItems();
+        List<CartItemDTO> cartItems = cart.getItems();
 
-        // 3. Convert CartItemDTO → OrderItem
-        List<OrderItem> orderItems = itemDTOS.stream()
+        List<OrderItem> orderItems = cartItems.stream()
                 .map(item -> {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setProductId(item.getProductId());
@@ -57,11 +59,8 @@ public class OrderService {
                 })
                 .toList();
 
-        // 4. Calculate total
         double totalAmount = 0.0;
-
-        for (CartItemDTO item : itemDTOS) {
-
+        for (CartItemDTO item : cartItems) {
             ProductDTO productDTO = productFeignConfig
                     .getProductById(item.getProductId())
                     .getData();
@@ -70,12 +69,9 @@ public class OrderService {
                 throw new RuntimeException("Product not found: " + item.getProductId());
             }
 
-            double price = productDTO.getPrice();
-            int quantity = item.getQuantity();
-
-            totalAmount += price * quantity;
+            totalAmount += productDTO.getPrice() * item.getQuantity();
         }
-        // 5. Create Order
+
         Order order = new Order();
         order.setUserMail(username);
         order.setItems(orderItems);
@@ -83,52 +79,45 @@ public class OrderService {
         order.setStatus(Status.CREATED);
         order.setCreatedAt(LocalDateTime.now());
 
-        // 6. Save Order
         Order savedOrder = orderRepository.save(order);
-
-        // 7. Clear cart
         cartFeignClient.deletecart();
 
         return savedOrder;
     }
 
-    public Order getOrderById (UUID id){
-        String usermail = SecurityContextHolder.getContext().getAuthentication().getName();
+    public Order getOrderById(UUID id) {
+        String userMail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (!order.getUserMail().equals(usermail)) {
+        if (!order.getUserMail().equals(userMail)) {
             throw new RuntimeException("you dont have any order with this order id");
         }
+
         return order;
-
-        }
-        public List<Order> getMyOrders(){
-            String usermail = SecurityContextHolder.getContext().getAuthentication().getName();
-            List<Order> myOrders = orderRepository.findOrderByUserMail(usermail);
-            return myOrders;
-        }
-        public Order UpdateOrderStatus(OrderStatusDTO dto,UUID id ){
-
-        //Only for admins
-            Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Order not found"));
-
-            order.setStatus(dto.getStatus());
-            return orderRepository.save(order);
-
-        }
-        public String cancelOrder(UUID id){
-            Order order = getOrderById(id);
-            if (order.getStatus().equals(SHIPPED) || order.getStatus().equals(DELIVERED)){
-                throw new RuntimeException("Order cannot be cancelled ");
-            }
-            orderRepository.delete(order);
-            return "order deleted";
-        }
-
-
     }
 
+    public List<Order> getMyOrders() {
+        String userMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return orderRepository.findOrderByUserMail(userMail);
+    }
 
+    public Order updateOrderStatus(OrderStatusDTO dto, UUID id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setStatus(dto.getStatus());
+        return orderRepository.save(order);
+    }
+
+    public String cancelOrder(UUID id) {
+        Order order = getOrderById(id);
+        if (order.getStatus().equals(SHIPPED) || order.getStatus().equals(DELIVERED)) {
+            throw new RuntimeException("Order cannot be cancelled ");
+        }
+
+        orderRepository.delete(order);
+        return "order deleted";
+    }
+}

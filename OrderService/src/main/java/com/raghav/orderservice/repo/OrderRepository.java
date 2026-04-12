@@ -1,6 +1,6 @@
 package com.raghav.orderservice.repo;
 
-import entity.Order;
+import com.raghav.orderservice.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
