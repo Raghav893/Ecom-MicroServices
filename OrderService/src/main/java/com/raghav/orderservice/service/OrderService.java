@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -72,7 +73,7 @@ public class OrderService {
         }
         // 5. Create Order
         Order order = new Order();
-        order.setUserId(username);
+        order.setUserMail(username);
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
         order.setStatus(Status.CREATED);
@@ -87,4 +88,18 @@ public class OrderService {
         return savedOrder;
     }
 
-}
+    public Order getOrderById (UUID id){
+        String usermail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getUserMail().equals(usermail)) {
+            throw new RuntimeException("you dont have any order with this order id");
+        }
+        return order;
+
+        }
+    }
+
+

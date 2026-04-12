@@ -19,7 +19,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID orderId;
 
-    private String userId;
+    private String userMail;
 
     private Double totalAmount;
 
