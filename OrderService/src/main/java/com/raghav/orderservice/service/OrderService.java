@@ -5,6 +5,7 @@ import com.raghav.orderservice.config.CartFeignClient;
 import com.raghav.orderservice.config.ProductFeignConfig;
 import com.raghav.orderservice.dto.CartDTO;
 import com.raghav.orderservice.dto.CartItemDTO;
+import com.raghav.orderservice.dto.OrderStatusDTO;
 import com.raghav.orderservice.dto.ProductDTO;
 import com.raghav.orderservice.repo.OrderRepository;
 import entity.Order;
@@ -98,6 +99,19 @@ public class OrderService {
             throw new RuntimeException("you dont have any order with this order id");
         }
         return order;
+
+        }
+        public List<Order> getMyOrders(){
+            String usermail = SecurityContextHolder.getContext().getAuthentication().getName();
+            List<Order> myOrders = orderRepository.findOrderByUserMail(usermail);
+            return myOrders;
+        }
+        public Order UpdateOrderStatus(OrderStatusDTO dto,UUID id ){
+            Order order = orderRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+
+            order.setStatus(dto.getStatus());
+            return orderRepository.save(order);
 
         }
     }
