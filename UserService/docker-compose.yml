@@ -23,3 +23,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    volumes:
+      -  mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:
