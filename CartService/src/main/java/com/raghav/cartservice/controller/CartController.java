@@ -5,12 +5,14 @@ import com.raghav.cartservice.dto.AddToCartDTO;
 import com.raghav.cartservice.entity.Cart;
 import com.raghav.cartservice.service.CartService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/cart")
+@PreAuthorize("hasAnyRole('USER')")
 public class CartController {
     private final CartService cartService;
 
